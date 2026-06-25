@@ -11,6 +11,13 @@ import requests
 import re
 import io
 
+yf_session = requests.Session()
+yf_session.headers.update({
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'application/json, text/plain, */*',
+    'Accept-Language': 'en-US,en;q=0.9',
+})
+
 fallback_fo_symbols = [
     "AARTIIND", "ABB", "ABBOTINDIA", "ABCAPITAL", "ABFRL", "ACC", "ADANIENT", "ADANIPORTS", "ALKEM", "AMBUJACEM", 
     "APOLLOHOSP", "APOLLOTYRE", "ASHOKLEY", "ASIANPAINT", "ASTRAL", "ATUL", "AUBANK", "AUROPHARMA", "AXISBANK", 
@@ -114,9 +121,9 @@ def get_yfinance_data():
         def fetch_chunk(chunk):
             ticker_str = " ".join([item[0] for item in chunk])
             # Download 5 days of daily data to get robust previous_close
-            d1 = yf.download(ticker_str, period="5d", interval="1d", group_by="ticker", progress=False)
+            d1 = yf.download(ticker_str, period="5d", interval="1d", group_by="ticker", progress=False, session=yf_session)
             # Download 1 day of 1-minute data to get robust real-time last_price and volume
-            d2 = yf.download(ticker_str, period="1d", interval="1m", group_by="ticker", progress=False)
+            d2 = yf.download(ticker_str, period="1d", interval="1m", group_by="ticker", progress=False, session=yf_session)
             return chunk, d1, d2
 
         final_result = []
