@@ -108,8 +108,8 @@ def get_yfinance_data():
                 sym_list.append((sym + ".NS", sym, False))
                 
         import gc
-        # Chunk the symbols into groups of 20 to use less memory
-        chunk_size = 20
+        # Chunk the symbols into groups of 50 since we use 99% less memory now
+        chunk_size = 50
         chunks = [sym_list[i:i + chunk_size] for i in range(0, len(sym_list), chunk_size)]
         
         final_result = []
@@ -117,34 +117,29 @@ def get_yfinance_data():
         for chunk in chunks:
             try:
                 ticker_str = " ".join([item[0] for item in chunk])
-                # Download 5 days of daily data to get robust previous_close
+                # Only download 5 days of daily data. The final row contains real-time live data for today!
                 d1 = yf.download(ticker_str, period="5d", interval="1d", group_by="ticker", progress=False)
-                # Download 1 day of 1-minute data to get robust real-time last_price and volume
-                d2 = yf.download(ticker_str, period="1d", interval="1m", group_by="ticker", progress=False)
                 
                 for item in chunk:
                     yf_sym, display_sym, is_index = item
                     
                     try:
-                        # Handle single ticker vs multiple tickers return format from yfinance
-                        df1m = d2[yf_sym] if len(chunk) > 1 else d2
+                        # Handle single ticker vs multiple tickers return format
                         df1d = d1[yf_sym] if len(chunk) > 1 else d1
                     
-                        closes_1m = df1m['Close'].dropna().values
-                        vols_1m = df1m['Volume'].dropna().values
                         closes_1d = df1d['Close'].dropna().values
+                        vols_1d = df1d['Volume'].dropna().values
                         
-                        if len(closes_1m) == 0 or len(closes_1d) == 0:
+                        if len(closes_1d) < 2:
                             continue
                             
-                        last_price = float(closes_1m[-1])
-                        volume = int(sum(vols_1m))
+                        # The very last row in a 1d interval is the current real-time price!
+                        last_price = float(closes_1d[-1])
+                        # Today's total volume so far
+                        volume = int(vols_1d[-1]) if len(vols_1d) > 0 else 0
                         
-                        # Previous close is the second to last available daily close
-                        if len(closes_1d) >= 2:
-                            previous_close = float(closes_1d[-2])
-                        else:
-                            previous_close = float(closes_1d[-1])
+                        # The second to last row is yesterday's final close
+                        previous_close = float(closes_1d[-2])
                             
                         if previous_close == 0:
                             continue
@@ -166,9 +161,8 @@ def get_yfinance_data():
                     except Exception as e:
                         pass
                 
-                # Aggressive garbage collection to prevent exceeding Render's 512MB limit
+                # Clean up memory immediately
                 del d1
-                del d2
                 gc.collect()
                 
             except Exception as e:
