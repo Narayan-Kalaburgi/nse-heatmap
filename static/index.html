@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NSE F&O Heatmap</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="style.css?v=39">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="header">
+        <div class="tabs">
+            <button class="tab active" id="tab-nifty50">Nifty 50 <span class="badge" id="badge-nifty50">0</span></button>
+            <button class="tab" id="tab-fo">F&amp;O <span class="badge" id="badge-fo">0</span></button>
+            <button class="tab" id="tab-gainers">Top Gainers <span class="badge" id="badge-gainers">0</span></button>
+            <button class="tab" id="tab-losers">Top Losers <span class="badge" id="badge-losers">0</span></button>
+        </div>
+        <div class="clock" id="live-clock">--:--:--</div>
+    </div>
+    
+    <div id="heatmap-container">
+        <div id="loading">Fetching Live Data from NSE...</div>
+    </div>
+
+    <script src="script.js?v=38"></script>
+</body>
+</html>
